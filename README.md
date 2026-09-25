@@ -112,7 +112,7 @@ python src/chunker.py    # TXT → chunk.json
 python src/indexer.py    # chunk.json → ChromaDB
 ```
 
-Index đã được build sẵn trong `data/index/`, nên mặc định có thể bỏ qua bước này.
+`data/index/` được gitignore (không nằm trong repo) — cần chạy bước này một lần trước khi hỏi đáp.
 
 ### Bước 2 — Hỏi đáp
 
