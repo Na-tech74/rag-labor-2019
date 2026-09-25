@@ -32,20 +32,32 @@ def main():
                 print(item)
     else:
         print(answer)
-
-    print("\n" + "=" * 60)
-    print("NGUỒN THAM KHẢO")
-    print("=" * 60)
-
-    seen = set()
-    for ctx in contexts:
-        article = ctx.get("article", "")
-        title = ctx.get("title", "")
-        source = f"{article} - {title}"
-        if source not in seen:
-            print(f"• {source}")
-            seen.add(source)
-            
+        
+    # Chỉ in nguồn tham khảo khi tra lời thành công
+    OUT_OF_DOMAIN_MARKER = "không liên quan đến bộ luật lao động"
+    
+    is_error=(
+        isinstance(answer,str) and answer.startswith("Gemini")
+    )
+    is_out_of_domain =isinstance(answer,str) and OUT_OF_DOMAIN_MARKER in answer.lower()
+    if not is_error and not is_out_of_domain:
+        print("\n" + "=" * 60)
+        print("NGUỒN THAM KHẢO")
+        print("=" * 60)
+        seen = set()
+        for ctx in contexts:
+            article = ctx.get("article", "")
+            title = ctx.get("title", "")
+            source = f"{article} - {title}"
+            if source not in seen:
+                print(f"• {source}")
+                seen.add(source)
+    else:
+        if is_error:
+            print("\nKhông có nguồn tham khảo vì Gemini chưa trả lời được.")
+        elif is_out_of_domain:
+            print("(Không có nguồn tham khảo vì câu hỏi không liên quan đến luật lao động.)")   
+                 
     # Vòng lập đễ có thể hỏi liên tục
     while True:
         choice = input("\n Chào Bạn ,có muốn hỏi câu khác không ? (y/yes) ").strip().lower()
