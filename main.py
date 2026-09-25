@@ -45,7 +45,19 @@ def main():
         if source not in seen:
             print(f"• {source}")
             seen.add(source)
-
+            
+    # Vòng lập đễ có thể hỏi liên tục
+    while True:
+        choice = input("\n Chào Bạn ,có muốn hỏi câu khác không ? (y/yes) ").strip().lower()
+        if choice in ["y","yes"]:
+            print("\nĐược nhé! Bạn cứ nhập câu hỏi tiếp theo.")
+            break
+        elif choice in ["n", "no"]:
+            print("\nCảm ơn bạn đã sử dụng RAG Bộ luật Lao động 2019.")
+            print("Chúc bạn một ngày tốt lành!")
+            return
+        else:
+            print("Vui lòng nhập 'y' để hỏi tiếp hoặc 'n' để thoát.")
 
 if __name__ == "__main__":
     main()
