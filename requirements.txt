@@ -1,0 +1,26 @@
+# RAG framework
+langchain
+langchain-community
+
+# Gemini
+langchain-google-genai
+
+# Vector database
+chromadb
+
+# Local embedding
+sentence-transformers
+
+# PDF / OCR
+pymupdf
+pytesseract
+Pillow
+
+# Hybrid search
+rank-bm25
+
+# Environment variables
+python-dotenv
+
+# Web UI
+streamlit
