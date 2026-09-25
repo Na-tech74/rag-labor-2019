@@ -1,0 +1,22 @@
+[
+  {
+    "question": "Người lao động được nghỉ phép năm bao nhiêu ngày?",
+    "relevant_articles": ["Điều 113"]
+  },
+  {
+    "question": "Thời giờ làm việc bình thường của người lao động là bao nhiêu giờ?",
+    "relevant_articles": ["Điều 105"]
+  },
+  {
+    "question": "Người lao động được nghỉ hằng tuần bao nhiêu ngày?",
+    "relevant_articles": ["Điều 111"]
+  },
+  {
+    "question": "Người lao động có quyền đơn phương chấm dứt hợp đồng lao động không?",
+    "relevant_articles": ["Điều 35"]
+  },
+  {
+    "question": "Tuổi nghỉ hưu của người lao động được quy định như thế nào?",
+    "relevant_articles": ["Điều 169"]
+  }
+]

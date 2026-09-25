@@ -1,0 +1,221 @@
+questions.json
+      ↓
+đọc từng câu hỏi
+      ↓
+search()
+      ↓
+calculate_metrics()
+      ↓
+cộng kết quả
+      ↓
+tính trung bình
+      ↓
+in báo cáo
+
+======================================================================
+CÂU 1: Người lao động được nghỉ phép năm bao nhiêu ngày?
+Ground truth: Điều 113
+
+Retrieved:
+1. Điều 113 | Nghỉ hằng năm | Distance: 9.6283
+
+Metrics:
+Hit@5:        1
+Recall@5:     1.0000
+Precision@5:  0.2000
+MRR@5:        1.0000
+2. Điều 110 | Nghỉ chuyển ca | Distance: 9.8363
+
+Metrics:
+Hit@5:        1
+Recall@5:     1.0000
+Precision@5:  0.2000
+MRR@5:        1.0000
+3. Điều 111 | Nghỉ hằng tuần | Distance: 9.8825
+
+Metrics:
+Hit@5:        1
+Recall@5:     1.0000
+Precision@5:  0.2000
+MRR@5:        1.0000
+4. Điều 47 | Trợ cấp mất việc làm | Distance: 9.9301
+
+Metrics:
+Hit@5:        1
+Recall@5:     1.0000
+Precision@5:  0.2000
+MRR@5:        1.0000
+5. Điều 109 | Nghỉ trong giờ làm việc | Distance: 10.3369
+
+Metrics:
+Hit@5:        1
+Recall@5:     1.0000
+Precision@5:  0.2000
+MRR@5:        1.0000
+
+======================================================================
+CÂU 2: Thời giờ làm việc bình thường của người lao động là bao nhiêu giờ?
+Ground truth: Điều 105
+
+Retrieved:
+1. Điều 105 | Thời giờ làm việc bình thường | Distance: 7.1222
+
+Metrics:
+Hit@5:        1
+Recall@5:     1.0000
+Precision@5:  0.2000
+MRR@5:        1.0000
+2. Điều 109 | Nghỉ trong giờ làm việc | Distance: 8.9516
+
+Metrics:
+Hit@5:        1
+Recall@5:     1.0000
+Precision@5:  0.2000
+MRR@5:        1.0000
+3. Điều 111 | Nghỉ hằng tuần | Distance: 11.1435
+
+Metrics:
+Hit@5:        1
+Recall@5:     1.0000
+Precision@5:  0.2000
+MRR@5:        1.0000
+4. Điều 107 | Làm thêm giờ | Distance: 11.6127
+
+Metrics:
+Hit@5:        1
+Recall@5:     1.0000
+Precision@5:  0.2000
+MRR@5:        1.0000
+5. Điều 110 | Nghỉ chuyển ca | Distance: 12.0194
+
+Metrics:
+Hit@5:        1
+Recall@5:     1.0000
+Precision@5:  0.2000
+MRR@5:        1.0000
+
+======================================================================
+CÂU 3: Người lao động được nghỉ hằng tuần bao nhiêu ngày?
+Ground truth: Điều 111
+
+Retrieved:
+1. Điều 111 | Nghỉ hằng tuần | Distance: 7.8121
+
+Metrics:
+Hit@5:        1
+Recall@5:     1.0000
+Precision@5:  0.2000
+MRR@5:        1.0000
+2. Điều 109 | Nghỉ trong giờ làm việc | Distance: 11.3787
+
+Metrics:
+Hit@5:        1
+Recall@5:     1.0000
+Precision@5:  0.2000
+MRR@5:        1.0000
+3. Điều 105 | Thời giờ làm việc bình thường | Distance: 11.6927
+
+Metrics:
+Hit@5:        1
+Recall@5:     1.0000
+Precision@5:  0.2000
+MRR@5:        1.0000
+4. Điều 110 | Nghỉ chuyển ca | Distance: 12.7381
+
+Metrics:
+Hit@5:        1
+Recall@5:     1.0000
+Precision@5:  0.2000
+MRR@5:        1.0000
+5. Điều 114 | Ngày nghỉ hằng năm tăng thêm theo thâm niên làm việc | Distance: 12.9399
+
+Metrics:
+Hit@5:        1
+Recall@5:     1.0000
+Precision@5:  0.2000
+MRR@5:        1.0000
+
+======================================================================
+CÂU 4: Người lao động có quyền đơn phương chấm dứt hợp đồng lao động không?
+Ground truth: Điều 35
+
+Retrieved:
+1. Điều 37 | Trường hợp người sử dụng lao động không được thực hiện quyền đơn phương chấm dứt hợp đồng lao động | Distance: 4.7256
+
+Metrics:
+Hit@5:        0
+Recall@5:     0.0000
+Precision@5:  0.0000
+MRR@5:        0.0000
+2. Điều 36 | Quyền đơn phương chấm dứt hợp đồng lao động của người sử dụng lao động | Distance: 4.8523
+
+Metrics:
+Hit@5:        0
+Recall@5:     0.0000
+Precision@5:  0.0000
+MRR@5:        0.0000
+3. Điều 38 | Hủy bỏ việc đơn phương chấm dứt hợp đồng lao động | Distance: 5.7214
+
+Metrics:
+Hit@5:        0
+Recall@5:     0.0000
+Precision@5:  0.0000
+MRR@5:        0.0000
+4. Điều 40 | Nghĩa vụ của người lao động khi đơn phương chấm dứt hợp đồng lao động trái pháp luật | Distance: 5.7291
+
+Metrics:
+Hit@5:        0
+Recall@5:     0.0000
+Precision@5:  0.0000
+MRR@5:        0.0000
+5. Điều 34 | Các trường hợp chấm dứt hợp đồng lao động | Distance: 6.2046
+
+Metrics:
+Hit@5:        0
+Recall@5:     0.0000
+Precision@5:  0.0000
+MRR@5:        0.0000
+
+======================================================================
+CÂU 5: Tuổi nghỉ hưu của người lao động được quy định như thế nào?
+Ground truth: Điều 169
+
+Retrieved:
+1. Điều 169 | Tuổi nghỉ hưu | Distance: 9.2892
+
+Metrics:
+Hit@5:        1
+Recall@5:     1.0000
+Precision@5:  0.2000
+MRR@5:        1.0000
+2. Điều 149 | Sử dụng người lao động cao tuổi | Distance: 10.4999
+
+Metrics:
+Hit@5:        1
+Recall@5:     1.0000
+Precision@5:  0.2000
+MRR@5:        1.0000
+3. Điều 54 | Điều kiện hưởng lương hưu** | Distance: 10.8034
+
+Metrics:
+Hit@5:        1
+Recall@5:     1.0000
+Precision@5:  0.2000
+MRR@5:        1.0000
+4. Điều 55 | Điều kiện hưởng lương hưu khi suy giảm khả năng lao động** | Distance: 10.8734
+
+Metrics:
+Hit@5:        1
+Recall@5:     1.0000
+Precision@5:  0.2000
+MRR@5:        1.0000
+5. Điều 148 | Người lao động cao tuổi | Distance: 11.6262
+
+Metrics:
+Hit@5:        1
+Recall@5:     1.0000
+Precision@5:  0.2000
+MRR@5:        1.0000
+(venv) PS D:\rag-labor-2019\evaluation> 
+
+
