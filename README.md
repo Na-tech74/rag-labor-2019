@@ -5,22 +5,25 @@ Hệ thống hỏi đáp (Q&A) bằng tiếng Việt dựa trên **RAG (Retrieva
 ## Kiến trúc
 
 ```text
-[PDF] → [OCR] → [TXT] → [Chunking] → [Embedding] → [ChromaDB]
-                                                        ↓
-[Câu hỏi] → [Embedding] → [Vector Search] → [Top-5 chunks]
-                                                        ↓
-                              [Gemini LLM + Context] → [Câu trả lời]
+[PDF] → [Đọc/OCR từng trang] → [TXT + marker [PAGE N]] → [Chunking] → [Embedding] → [ChromaDB]
+                                                                                      ↓
+[Câu hỏi] → [Embedding] → [Vector Search] → [Top-5 chunks]                          ↓
+                                                            [Gemini LLM + Context] → [Câu trả lời]
 ```
 
 | Bước | Script | Mô tả |
 |------|--------|-------|
-| 1. OCR | `src/ocr.py` | PDF scan → TXT (PyMuPDF render 2x + Tesseract `vie+eng`, đánh dấu `[PAGE X]`) |
-| 2. Chunk | `src/chunker.py` | TXT → chunks theo từng Điều (regex split), lưu `chunk.json` |
-| 3. Index | `src/indexer.py` | Chunks → embedding → ChromaDB (collection `labor_law_2019`) |
-| 4. Retrieve | `src/retriever.py` | Vector search top-5 chunks liên quan |
+| 1. Trang | `src/ocr.py` | Đọc PDF theo trang (text layer nếu có, không thì OCR Tesseract) → dò heading `Điều N` → **chèn marker `[PAGE N]` vào TXT** |
+| 2. Chunk | `src/chunker.py` | TXT → chunks theo từng Điều, lấy số trang từ marker, **gỡ marker trước khi tách** → `chunk.json` |
+| 3. Index | `src/indexer.py` | Chunks → embedding → ChromaDB (collection `labor_law_2019`, khoảng cách cosine) |
+| 4. Retrieve | `src/retriever.py` | Vector search + lọc kết quả theo ngưỡng khoảng cách `MAX_DISTANCE` |
 | 5. Generate | `src/generator.py` | Gemini trả lời **chỉ** dựa trên context được cung cấp |
 | 6. App | `main.py` | CLI hỏi đáp |
 | 7. Đánh giá | `evaluation/evaluate_retrieval.py` | Đo chất lượng retrieval trên bộ câu hỏi chuẩn |
+
+> Số trang nằm **trong chính file TXT** dưới dạng `[PAGE N]` — không có file phụ nào.
+> `src/chunker.py` gỡ marker trước khi tách nên marker không bao giờ lọt vào chunk,
+> embedding hay câu trả lời Gemini. Chạy lại `src/ocr.py` bao nhiêu lần cũng được (idempotent).
 
 ## Công nghệ
 
@@ -29,10 +32,10 @@ Hệ thống hỏi đáp (Q&A) bằng tiếng Việt dựa trên **RAG (Retrieva
 | langchain-google-genai | Gemini API (`gemini-3.8-flash`, temperature 0.1) |
 | chromadb | Vector database (persistent, `data/index/`) |
 | sentence-transformers | Embedding local: `paraphrase-multilingual-MiniLM-L12-v2` |
-| pymupdf, pytesseract, Pillow | Đọc PDF & OCR |
+| pymupdf, pytesseract, Pillow | Render trang PDF + OCR lấy số trang |
 | python-dotenv | Load API key từ `.env` |
 
-> `requirements.txt` còn cài `langchain`, `langchain-community`, `rank-bm25`, `streamlit` — hiện chưa được dùng trong code.
+> `requirements.txt` chỉ còn các thư viện thực sự dùng trong code (`langchain-google-genai`, `chromadb`, `sentence-transformers`, `pymupdf`, `pytesseract`, `Pillow`, `python-dotenv`).
 
 ## Cấu trúc dự án
 
@@ -43,11 +46,12 @@ rag-labor-2019/
 ├── .env / .env.example        # GEMINI_API_KEY
 │
 ├── src/
-│   ├── ocr.py                 # PDF → TXT (OCR Tesseract)
-│   ├── chunker.py             # TXT → chunks theo Điều
-│   ├── indexer.py             # Chunks → embedding → ChromaDB
-│   ├── retriever.py           # Vector search top-5
-│   └── generator.py           # Gemini sinh câu trả lời
+│   ├── config.py               # Đường dẫn + cấu hình dùng chung
+│   ├── ocr.py                  # Đọc PDF → xuất file TXT 
+│   ├── chunker.py              # TXT → chunks theo Điều (lấy số trang từ marker)
+│   ├── indexer.py              # Chunks → embedding → ChromaDB (cosine)
+│   ├── retriever.py            # Vector search + lọc theo ngưỡng khoảng cách
+│   └── generator.py            # Gemini sinh câu trả lời
 │
 ├── evaluation/
 │   ├── questions.json         # 5 câu hỏi + Điều chuẩn (ground truth)
@@ -56,7 +60,7 @@ rag-labor-2019/
 │
 ├── data/
 │   ├── raw/                   # bo-luat-lao-dong-2019.pdf
-│   ├── processed/             # bo-luat-lao-dong-2019.txt, chunk.json
+│   ├── processed/             # bo-luat-lao-dong-2019.txt (có marker [PAGE N]), chunk.json
 │   └── index/                 # ChromaDB (chroma.sqlite3)
 │
 └── Bo_luat_Lao_dong_2019_da_chinh_sua.md
@@ -67,12 +71,17 @@ rag-labor-2019/
 ### 1. Yêu cầu
 
 - Python 3.10+
-- [Tesseract OCR](https://github.com/tesseract-ocr/tesseract) cho Windows, có ngôn ngữ `vie` và `eng`
+- [Tesseract OCR](https://github.com/tesseract-ocr/tesseract) **chỉ cần khi PDF là bản scan**
+  (không có text layer) — có bộ ngôn ngữ `vie` và `eng`.
+  PDF số hoá thì `src/ocr.py` đọc thẳng, không cần Tesseract.
 
 ```bash
 tesseract --version
 tesseract --list-langs
 ```
+
+> `src/ocr.py` tìm tesseract theo thứ tự: biến môi trường `TESSERACT_CMD` → `PATH` →
+> `%LOCALAPPDATA%\Tesseract-OCR` → `C:\Program Files\Tesseract-OCR`.
 
 ### 2. Environment
 
@@ -92,27 +101,27 @@ copy .env.example .env         # rồi điền GEMINI_API_KEY của bạn
 GEMINI_API_KEY = your_api_key
 ```
 
-### 3. Đường dẫn cứng (quan trọng)
+### 3. Đường dẫn & cấu hình
 
-Các file `src/ocr.py`, `src/chunker.py`, `src/indexer.py`, `src/retriever.py`, `evaluation/evaluate_retrieval.py` đang hardcode đường dẫn tuyệt đối `D:\rag-labor-2019\...`, và `ocr.py` hardcode đường dẫn `tesseract.exe`.
-
-Nếu bạn clone dự án về thư mục khác hoặc cài Tesseract ở chỗ khác, hãy sửa các hằng số này:
-
-- `PDF_PATH`, `TXT_PATH`, `JSON_PATH`, `CHUNKS_PATH`
-- `CHROMA_PATH`, `QUESTIONS_PATH`
-- `pytesseract.pytesseract.tesseract_cmd`
+Toàn bộ đường dẫn, tên model, tên collection và ngưỡng khoảng cách nằm trong **`src/config.py`**.
+Clone dự án về thư mục khác thì không cần sửa gì — đường dẫn tự tính theo vị trí file.
 
 ## Sử dụng
 
 ### Bước 1 — Ingest (chỉ chạy khi muốn build lại index)
 
 ```bash
-python src/ocr.py        # PDF → TXT   (chậm, ~mỗi trang một lần OCR)
-python src/chunker.py    # TXT → chunk.json
-python src/indexer.py    # chunk.json → ChromaDB
+python -m src.ocr        # Đọc PDF theo trang → chèn marker [PAGE N] vào TXT
+python -m src.chunker    # TXT (có marker) → chunk.json (220 chunk, có số trang)
+python -m src.indexer    # chunk.json → ChromaDB
 ```
 
 `data/index/` được gitignore (không nằm trong repo) — cần chạy bước này một lần trước khi hỏi đáp.
+
+> **Số trang:** nằm ngay trong `data/processed/bo-luat-lao-dong-2019.txt` dưới dạng
+> `[PAGE N]` phía trên heading `### Điều N.`. `src/chunker.py` tự đọc và gỡ marker
+> trước khi tách chunk. Không có file phụ nào, và chạy lại `src/ocr.py` bao nhiêu lần
+> cũng không bị trùng marker (nó gỡ marker cũ trước khi chèn lại).
 
 ### Bước 2 — Hỏi đáp
 
@@ -126,7 +135,7 @@ Ví dụ:
 Nhập câu hỏi: Người lao động được nghỉ phép năm bao nhiêu ngày?
 ```
 
-Kết quả gồm **CÂU TRẢ LỜI** và danh sách **NGUỒN THAM KHẢO** (Điều - tiêu đề).
+Kết quả gồm **CÂU TRẢ LỜI** và danh sách **NGUỒN THAM KHẢO** (Điều - tiêu đề - trang).
 
 Chỉ xem top-5 chunks mà không gọi LLM:
 

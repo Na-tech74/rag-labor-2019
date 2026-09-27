@@ -1,31 +1,44 @@
-from pathlib import Path
 import json
 
 import chromadb
 from sentence_transformers import SentenceTransformer
 
-CHUNKS_PATH = Path(r"D:\rag-labor-2019\data\processed\chunk.json")
-CHROMA_PATH = Path(r"D:\rag-labor-2019\data\index")
-MODEL_NAME = "sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2"
-COLLECTION_NAME = "labor_law_2019"
+from src.config import (
+    CHROMA_PATH,
+    COLLECTION_NAME,
+    EMBEDDING_MODEL,
+    JSON_PATH,
+)
 
 
 def load_chunks():
     """Đọc danh sách chunks từ file JSON."""
-    with open(CHUNKS_PATH, "r", encoding="utf-8") as f:
+    with open(JSON_PATH, "r", encoding="utf-8") as f:
         return json.load(f)
 
 
 def create_index():
-    """Tạo vector index: text → embedding → ChromaDB."""
+    """Tạo vector index: text → embedding → ChromaDB (khoảng cách cosine)."""
     chunks = load_chunks()
     print(f"Số chunks: {len(chunks)}")
 
     print("Đang load embedding model...")
-    model = SentenceTransformer(MODEL_NAME)
+    model = SentenceTransformer(EMBEDDING_MODEL)
 
     client = chromadb.PersistentClient(path=str(CHROMA_PATH))
-    collection = client.get_or_create_collection(name=COLLECTION_NAME)
+
+    # Xóa index cũ rồi tạo lại với khoảng cách cosine,
+    # để giá trị distance nằm trong [0, 2] và so sánh được với ngưỡng MAX_DISTANCE.
+    try:
+        client.delete_collection(name=COLLECTION_NAME)
+        print("Đã xóa index cũ.")
+    except Exception:
+        pass
+
+    collection = client.create_collection(
+        name=COLLECTION_NAME,
+        metadata={"hnsw:space": "cosine"},
+    )
 
     documents, ids, metadatas = [], [], []
     for chunk in chunks:
@@ -34,20 +47,20 @@ def create_index():
         metadatas.append({
             "article": chunk.get("article", ""),
             "title": chunk.get("title", ""),
-            "page": chunk.get("page", 0)
+            "page": int(chunk.get("page") or 0),
         })
 
-    #print("Đang tạo embeddings...")
+    print("Đang tạo embeddings...")
     embeddings = model.encode(documents, show_progress_bar=True)
 
     collection.upsert(
         ids=ids,
         documents=documents,
         metadatas=metadatas,
-        embeddings=embeddings.tolist()
+        embeddings=embeddings.tolist(),
     )
 
-    #print(f"\nĐã lưu vào ChromaDB. Số documents: {collection.count()}")
+    print(f"Đã index {collection.count()} chunks vào '{COLLECTION_NAME}'.")
 
 
 if __name__ == "__main__":

@@ -1,5 +1,33 @@
-from src.retriever import search
 from src.generator import generate_answer
+from src.retriever import search
+
+
+def show_answer(answer, status, contexts):
+    """In câu trả lời và nguồn tham khảo (nếu có)."""
+    print("\n" + "=" * 60)
+    print("CÂU TRẢ LỜI")
+    print("=" * 60)
+    print(answer)
+
+    if status == "ok":
+        print("\n" + "=" * 60)
+        print("NGUỒN THAM KHẢO")
+        print("=" * 60)
+        seen = set()
+        for ctx in contexts:
+            source = f"{ctx['article']} - {ctx['title']}"
+            if source in seen:
+                continue
+            seen.add(source)
+            if ctx.get("page"):
+                source += f" (trang {ctx['page']})"
+            print(f"• {source}")
+    elif status == "out_of_domain":
+        print("\n(Câu hỏi không liên quan đến Bộ luật Lao động nên không có nguồn.)")
+    elif status == "error":
+        print("\n(Không có nguồn tham khảo vì Gemini chưa trả lời được.)")
+    elif status == "not_found":
+        print("\n(Không tìm thấy ngữ cảnh phù hợp trong Bộ luật.)")
 
 
 def main():
@@ -7,69 +35,30 @@ def main():
     print("RAG - BỘ LUẬT LAO ĐỘNG 2019")
     print("=" * 60)
 
-    question = input("\nNhập câu hỏi: ").strip()
-    if not question:
-        print("Vui lòng nhập câu hỏi.")
-        return
-
-    # BƯỚC 1: RETRIEVAL - Tìm các điều luật liên quan đến câu hỏi
-    print("\nĐang tra cứu...")
-    contexts = search(question, top_k=5)
-
-    # BƯỚC 2: GENERATION - Gửi câu hỏi + ngữ cảnh cho Gemini sinh câu trả lời
-    print("Đang hỏi Gemini...")
-    answer = generate_answer(question, contexts)
-
-    print("\n" + "=" * 60)
-    print("CÂU TRẢ LỜI")
-    print("=" * 60)
-
-    if isinstance(answer, list):
-        for item in answer:
-            if isinstance(item, dict) and item.get("type") == "text":
-                print(item.get("text", ""))
-            else:
-                print(item)
-    else:
-        print(answer)
-        
-    # Chỉ in nguồn tham khảo khi tra lời thành công
-    OUT_OF_DOMAIN_MARKER = "không liên quan đến bộ luật lao động"
-    
-    is_error=(
-        isinstance(answer,str) and answer.startswith("Gemini")
-    )
-    is_out_of_domain =isinstance(answer,str) and OUT_OF_DOMAIN_MARKER in answer.lower()
-    if not is_error and not is_out_of_domain:
-        print("\n" + "=" * 60)
-        print("NGUỒN THAM KHẢO")
-        print("=" * 60)
-        seen = set()
-        for ctx in contexts:
-            article = ctx.get("article", "")
-            title = ctx.get("title", "")
-            source = f"{article} - {title}"
-            if source not in seen:
-                print(f"• {source}")
-                seen.add(source)
-    else:
-        if is_error:
-            print("\nKhông có nguồn tham khảo vì Gemini chưa trả lời được.")
-        elif is_out_of_domain:
-            print("(Không có nguồn tham khảo vì câu hỏi không liên quan đến luật lao động.)")   
-                 
-    # Vòng lập đễ có thể hỏi liên tục
     while True:
-        choice = input("\n Chào Bạn ,có muốn hỏi câu khác không ? (y/yes) ").strip().lower()
-        if choice in ["y","yes"]:
-            print("\nĐược nhé! Bạn cứ nhập câu hỏi tiếp theo.")
-            break
-        elif choice in ["n", "no"]:
-            print("\nCảm ơn bạn đã sử dụng RAG Bộ luật Lao động 2019.")
-            print("Chúc bạn một ngày tốt lành!")
-            return
-        else:
+        question = input("\nNhập câu hỏi: ").strip()
+        if not question:
+            print("Vui lòng nhập câu hỏi.")
+            continue
+
+        print("\nĐang tra cứu...")
+        contexts = search(question)
+
+        print("Đang hỏi Gemini...")
+        answer, status = generate_answer(question, contexts)
+
+        show_answer(answer, status, contexts)
+
+        while True:
+            choice = input("\nBạn có muốn hỏi câu khác không? (y/n) ").strip().lower()
+            if choice in ("y", "yes"):
+                break
+            if choice in ("n", "no"):
+                print("\nCảm ơn bạn đã sử dụng RAG Bộ luật Lao động 2019.")
+                print("Chúc bạn một ngày tốt lành!")
+                return
             print("Vui lòng nhập 'y' để hỏi tiếp hoặc 'n' để thoát.")
+
 
 if __name__ == "__main__":
     main()

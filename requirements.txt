@@ -1,7 +1,3 @@
-# RAG framework
-langchain
-langchain-community
-
 # Gemini
 langchain-google-genai
 
@@ -16,11 +12,5 @@ pymupdf
 pytesseract
 Pillow
 
-# Hybrid search
-rank-bm25
-
 # Environment variables
 python-dotenv
-
-# Web UI
-streamlit

@@ -56,22 +56,22 @@ CÂU TRẢ LỜI:
         content = response.content
 
         if isinstance(content, str):
-            return content , "ok"
+            text = content
         elif isinstance(content, list):
-            return "\n".join(
+            text = "\n".join(
                 item.get("text", "")
                 for item in content
                 if isinstance(item, dict) and item.get("type") == "text"
             )
         else:
-            text= str(content)
-    
-        # Phân loại dựa trên nội dung 
+            text = str(content)
+
+        # Phân loại dựa trên nội dung
         OUT_OF_DOMAIN_MARKER = "không liên quan đến bộ luật lao động"
         if OUT_OF_DOMAIN_MARKER in text.lower():
-            return text , " out_of_domain"
+            return text , "out_of_domain"
         return text, "ok"
-    
+
     #Bắt lỗi hệ thống
     except Exception as e:
         error_message = str(e)
@@ -85,4 +85,4 @@ CÂU TRẢ LỜI:
         if "503" in error_message or "UNAVAILABLE" in error_message:
             return ( "Gemini đang tạm thời quá tải." 
                         " Vui lòng thử lại sau." ,"error")
-        return f" Không thể tạo ra câu trả lời từ Gemini: {e}"
+        return f" Không thể tạo ra câu trả lời từ Gemini: {e}", "error"
